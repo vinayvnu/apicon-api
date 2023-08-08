@@ -1,11 +1,16 @@
 from typing import Optional
-from fastapi import FastAPI, Response, status, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException, Depends
 
 # from fastapi.params import Body
 from pydantic import BaseModel
 from random import randrange
-from app.conn import db_conn_select, db_conn_insert, db_conn_delete, db_conn_update
+from .conn import db_conn_select, db_conn_insert, db_conn_delete, db_conn_update
+from . import model
+from .sqlalchemy import engine, get_db
+from sqlalchemy.orm import Session
+import time
 
+model.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
@@ -13,7 +18,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
+    # rating: Optional[int] = None
 
 
 my_posts = [
@@ -34,36 +39,50 @@ def find_index_post(id_to_find):
             return i
 
 
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    posts = db.query(model.Post).all()
+    print(posts)
+    return {"status": posts}
+
+
 @app.get("/")
 async def root():
     return {"message": "HelloWorld!!!!!"}
 
 
 @app.get("/posts")
-def get_posts():
+def get_posts(db: Session = Depends(get_db)):
     print("here5")
-    data = db_conn_select("""select * from apicon.posts order by id""")
+    data = db.query(model.Post).all()
+    # data = db_conn_select("""select * from apicon.posts order by id""")
     print(data)
-    return {"data": my_posts}
+    return {"data": data}
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post):
-    # print("here4")
+def create_posts(post: Post, db: Session = Depends(get_db)):
+    print("here4")
     # # print(post.model_dump())
     # post_dict = post.model_dump()
     # post_dict["id"] = randrange(0, 1000000)
     # my_posts.append(post.model_dump())
-    publish_value_pass = 1
-    if post.published:
-        publish_value_pass = 1
-    else:
-        publish_value_pass = 0
-    query = f"INSERT INTO `apicon`.`posts` (`title`, `content`, `PUBLISHED`) VALUES ('{post.title}', '{post.content}', {publish_value_pass})"
-    print(query)
+    # publish_value_pass = 1
+    # if post.published:
+    #     publish_value_pass = 1
+    # else:
+    #     publish_value_pass = 0
+    # query = f"INSERT INTO `apicon`.`posts` (`title`, `content`, `PUBLISHED`) VALUES ('{post.title}', '{post.content}', {publish_value_pass})"
+    # print(query)
+    print(post.model_dump())
+    new_posts = model.Post(**post.model_dump())
+    # new_posts = model.Post(title=post.title, content=post.content, published=post.published)
+    db.add(new_posts)
+    db.commit()
+    db.refresh(new_posts)
 
-    returned_data = db_conn_insert(query)
-    print(f"returned_data: {returned_data}")
+    # returned_data = db_conn_insert(query)
+    print(f"returned_data: {new_posts}")
     return {"data"}
 
 
