@@ -4,11 +4,14 @@ install:
 	pip install -r requirements.txt
 
 format:
-	black app/*.py
+	black app/*.py app/routers/*.py
 
 lint:
 	# it disables Recommended warnings(R) and configuration warnings(C)
-	pylint --disable=R,C app/*.py
+	pylint --disable=R,C app/*.py app/routers/*.py
+
+freeze:
+	pip freeze >requirements.txt
 
 #test:
 #	python -m pytest -vv --cov=mylib test_logic.py

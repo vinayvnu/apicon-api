@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class PostBase(BaseModel):
@@ -13,3 +13,14 @@ class PostCreate(PostBase):
 
 class PostResponse(PostBase):
     id: int
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+
+
+class UserResponse(BaseModel):
+    email: EmailStr
+    name: str

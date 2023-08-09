@@ -12,6 +12,7 @@ class Post(Base):
     published = Column(Boolean, server_default="1", nullable=False, default=True)
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
 
+
 class Users(Base):
     __tablename__ = "users_in"
     email = Column(String(255), nullable=False, unique=True)
