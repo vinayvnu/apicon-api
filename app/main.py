@@ -3,7 +3,7 @@ from .conn import db_conn_select, db_conn_insert, db_conn_delete, db_conn_update
 from .sqlalchemy import engine, get_db
 from sqlalchemy.orm import Session
 from . import model, schemas, utils
-from .routers import post, user
+from .routers import post, user, auth
 
 import time
 
@@ -31,6 +31,7 @@ def find_index_post(id_to_find):
 
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 
 @app.get("/")
