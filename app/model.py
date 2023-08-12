@@ -1,20 +1,28 @@
 from .sqlalchemy import Base
-from sqlalchemy import Column, Integer, Boolean, String
+from sqlalchemy import Column, Integer, Boolean, String, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP, DateTime
 
 
 class Post(Base):
-    __tablename__ = "post_req3"
+    __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String(255), nullable=False)
     content = Column(String(500), nullable=False)
     published = Column(Boolean, server_default="1", nullable=False, default=True)
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    owner_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    # below code will create a property for the post, so when we retrieve a post its going to
+    # retrieve owner property and its going to figure out the relationship.
+    # Users passesd is the class name not the table name.
+    owner = relationship("Users")
 
 
 class Users(Base):
-    __tablename__ = "users_in"
+    __tablename__ = "users"
     email = Column(String(255), nullable=False, unique=True)
     password = Column(String(255), nullable=False, unique=True)
     id = Column(Integer, primary_key=True, nullable=False)

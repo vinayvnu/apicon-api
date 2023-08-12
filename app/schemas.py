@@ -1,18 +1,5 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr
-
-
-class PostBase(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
-
-class PostCreate(PostBase):
-    pass
-
-
-class PostResponse(PostBase):
-    id: int
 
 
 class UserCreate(BaseModel):
@@ -29,3 +16,32 @@ class UserResponse(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+class PostBase(BaseModel):
+    title: str
+    content: str
+    published: bool = True
+
+
+class PostCreate(PostBase):
+    pass
+
+
+class PostResponse(PostBase):
+    id: int
+    owner_id: int
+    owner: UserResponse
+
+    # TODO figure our the use of Config class
+    class Config:
+        orm_mode = True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
