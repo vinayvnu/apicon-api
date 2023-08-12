@@ -4,11 +4,11 @@ install:
 	pip install -r requirements.txt
 
 format:
-	black app/*.py app/routers/*.py
+	black app/*.py app/routers/*.py alembic/*.py
 
 lint:
 	# it disables Recommended warnings(R) and configuration warnings(C)
-	pylint --disable=R,C app/*.py app/routers/*.py
+	pylint --disable=R,C app/*.py app/routers/*.py alembic/*.py
 
 freeze:
 	pip freeze >requirements.txt

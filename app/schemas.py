@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, conint
 
 
 class UserCreate(BaseModel):
@@ -38,6 +38,11 @@ class PostResponse(PostBase):
         orm_mode = True
 
 
+class PostOut(PostBase):
+    Post: PostResponse
+    votes: int
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -45,3 +50,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str] = None
+
+
+class Vote(BaseModel):
+    post_id: int
+    dir: conint(le=1, ge=0)

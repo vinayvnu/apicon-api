@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from typing import List, Optional
+from fastapi import Response, status, HTTPException, Depends, APIRouter
+from typing import Optional
 from sqlalchemy.orm import Session
-from ..sqlalchemy import engine, get_db
-from .. import model, schemas, oauth2
+from app.sqlalchemy import get_db
+from app import model, schemas, oauth2
+from sqlalchemy import func
 
 # by adding prefix the common /posts from decorators can be removed
 # tags are used to group tags into categories in  swagger ui
@@ -12,7 +13,8 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 # @router.get("/posts", response_model=List[schemas.PostResponse])
 # limit is the query parameter it can be called like this
 # http://127.0.0.1:8000/posts?limit=3&skip=1&search=onetext%20twotext
-@router.get("/", response_model=List[schemas.PostResponse])
+@router.get("/")
+# @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(
     db: Session = Depends(get_db),
     limit: int = 10,
@@ -27,6 +29,17 @@ def get_posts(
         .offset(skip)
         .all()
     )
+
+    results = (
+        db.query(model.Post, func.count(model.Vote.post_id).label("votes"))
+        .join(model.Vote, model.Vote.post_id == model.Post.id, isouter=True)
+        .group_by(model.Post.id)
+        .filter(model.Post.title.contains(search))
+        .limit(limit)
+        .offset(skip)
+        .all()
+    )
+    print(results)
     print(limit)
     return data
 
@@ -39,7 +52,7 @@ def get_posts(
 def create_posts(
     post: schemas.PostCreate,
     db: Session = Depends(get_db),
-    # current_user: int = Depends(oauth2.get_current_user)
+    # current_user: int = Depends(oauth2.get_current_user())
 ):
     print("here4")
     current_user: int = Depends(oauth2.get_current_user)

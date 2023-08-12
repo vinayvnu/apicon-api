@@ -2,7 +2,7 @@ from .sqlalchemy import Base
 from sqlalchemy import Column, Integer, Boolean, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
-from sqlalchemy.sql.sqltypes import TIMESTAMP, DateTime
+from sqlalchemy.sql.sqltypes import DateTime
 
 
 class Post(Base):
@@ -28,3 +28,13 @@ class Users(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
     name = Column(String(255), nullable=False, unique=True)
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    post_id = Column(
+        Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True
+    )
